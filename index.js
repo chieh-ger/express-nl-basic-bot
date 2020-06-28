@@ -2,6 +2,7 @@ const express = require('express');
 const axios = require('axios');
 const moment = require('moment');
 const cors = require('cors');
+const config = require('./config');
 
 const app = express();
 
@@ -14,7 +15,7 @@ app.get('/', (req, res) => {
 });
 app.post('/', async(req, res) => { 
     if (req.body.message.toLowerCase().indexOf('debit order') > -1 && (req.body.message.toLowerCase().indexOf('balance') > -1 || req.body.message.toLowerCase().indexOf('money') > -1 || req.body.message.toLowerCase().indexOf('amount') > -1)) {
-        await axios.get(`https://chat-bot-db.herokuapp.com/user?accountId=${req.body.user}`).then(response => {
+        await axios.get(`${config.dbUrl}/user?accountId=${req.body.user}`).then(response => {
             let debitOrders = '';
             response.data.data[0].debitOrders.forEach(item => {
                 debitOrders += `${item.name} - R${item.amount}, `;
@@ -27,7 +28,7 @@ app.post('/', async(req, res) => {
             res.send(err);
         });  
     } else if (req.body.message.toLowerCase().indexOf('debit order') > -1) {
-        await axios.get(`https://chat-bot-db.herokuapp.com/user?accountId=${req.body.user}`).then(response => {
+        await axios.get(`${config.dbUrl}/user?accountId=${req.body.user}`).then(response => {
             let debitOrders = '';
             response.data.data[0].debitOrders.forEach(item => {
                 debitOrders += `${item.name} - R${item.amount}, `;
@@ -40,7 +41,7 @@ app.post('/', async(req, res) => {
             res.send(err);
         });
     } else if (req.body.message.toLowerCase().indexOf('balance') > -1 || req.body.message.toLowerCase().indexOf('money') > -1 || req.body.message.toLowerCase().indexOf('cash') > -1 || req.body.message.toLowerCase().indexOf('amount') > -1) {
-        await axios.get(`https://chat-bot-db.herokuapp.com/user?accountId=${req.body.user}`).then(response => {
+        await axios.get(`${config.dbUrl}/user?accountId=${req.body.user}`).then(response => {
             res.send({
                 message: `Cheque Balance: R${response.data.data[0].balance}. Credit Card Balance: R${response.data.data[0].ccBalance}`
             });
@@ -59,7 +60,7 @@ app.post('/', async(req, res) => {
     }
 });
 app.post('/saveMessage', async(req, res) => {
-    let fetchChatsForUser = await axios.get('https://chat-bot-db.herokuapp.com/chat');
+    let fetchChatsForUser = await axios.get(`${config.dbUrl}/chat`);
     let matched = false;
     let matchedEntry = {};
     for(let history of fetchChatsForUser.data.data) {
@@ -70,19 +71,19 @@ app.post('/saveMessage', async(req, res) => {
         }
     }
     if(matched) {
-        await axios.put(`https://chat-bot-db.herokuapp.com/chat?accountId=${req.body.user}&date=${moment().format('YYYY-MM-DD')}`, {history: [...matchedEntry, ...req.body.history], status: req.body.status}).then(response => res.send(response.data)).catch(err => {
+        await axios.put(`${config.dbUrl}/chat?accountId=${req.body.user}&date=${moment().format('YYYY-MM-DD')}`, {history: [...matchedEntry, ...req.body.history], status: req.body.status}).then(response => res.send(response.data)).catch(err => {
             console.log(err);
             res.send('History not saved');
         });
     } else {
-        let userDetails = await axios.get(`https://chat-bot-db.herokuapp.com/user?accountId=${req.body.user}`);
+        let userDetails = await axios.get(`${config.dbUrl}/user?accountId=${req.body.user}`);
         let newChat = {
             username: userDetails.data.data.username,
             accountId: req.body.user,
             status: req.body.status,
             history: req.body.history
         }
-        await axios.post(`https://chat-bot-db.herokuapp.com/chat`, newChat).then(response => res.send(response.data)).catch(err => {
+        await axios.post(`${config.dbUrl}/chat`, newChat).then(response => res.send(response.data)).catch(err => {
             console.log(err);
             res.send('History not saved');
         });
