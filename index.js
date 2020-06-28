@@ -55,7 +55,7 @@ app.post('/', async(req, res) => {
         res.send({message: 'Goodbye! Have a lovely day!'});
     } else {
         res.send({
-            message: 'Sorry, please can you rephrase your query? Alternatively, if you are not getting the answer you require, please contact support@fcb.com'
+            message: 'Sorry, please can you rephrase your query?'
         });
     }
 });
