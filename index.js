@@ -51,7 +51,7 @@ app.post('/', async(req, res) => {
         });
     } else if(req.body.message.toLowerCase() === 'hello' || req.body.message.toLowerCase() === 'hi') {
         res.send({message: 'Hello to you too, how can I help you today?'});
-    } else if(req.body.message.toLowerCase().indexOf('bye') > -1 ) {
+    } else if(req.body.message.toLowerCase().indexOf('bye') > -1 || req.body.message.toLowerCase().indexOf('cheers') > -1 || req.body.message.toLowerCase().indexOf('see you') > -1) {
         res.send({message: 'Goodbye! Have a lovely day!'});
     } else {
         res.send({
